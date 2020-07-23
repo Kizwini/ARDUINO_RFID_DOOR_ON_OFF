@@ -13,3 +13,5 @@ MISO pin is connected to Arduino pin 12
 MOSI pin is connected to Arduino pin 11
 SCK pin is connected to Arduino pin 13
 LED is connected to Arduino Pin 2
+
+# Video Link available in : https://www.youtube.com/watch?v=j3S1gPCIxtA
