@@ -1,0 +1,59 @@
+// Code by Ahmed Noori Al-Quzweeni
+// ---
+#include <SPI.h>          // Includes SPI library
+#include <MFRC522.h>      // Includes MFRC522 Library
+String UID_found;         // string variable to store the found Card ID
+byte Buzzer = 4;          // Buzzer is connected to Arduino pin 4
+byte RST_PIN = 9;         // RFID Reset Pin is connected to Arduino Pin 9
+byte SS_PIN = 10;         // SDA (SS) pin is connected to Arduino pin 10;
+bool DoorStat = 0;        // Door initial state (LED here)
+byte LEDpin = 2;          // LED is connected to Arduino Pin 2
+
+MFRC522 mfrc522(SS_PIN, RST_PIN); // create an RFID object (instance the MFRC522 class)
+
+void setup() { 
+  Serial.begin(9600);         // initialise the Serial comm 
+  SPI.begin();                // initialise te SPI comm
+  pinMode(Buzzer, OUTPUT);    // set the Buzzer pin as an output pin
+  pinMode(LEDpin,OUTPUT);     // set the LEd pin as an output pin
+  mfrc522.PCD_Init();         // initialise RFID reader
+  mfrc522.PCD_DumpVersionToSerial();  // copy the RFID version the serial Monitor
+}
+void loop() {
+  if ( ! mfrc522.PICC_IsNewCardPresent()) {  // Reset the loop if no new card present on the sensor/reader.
+    return; }
+  if ( ! mfrc522.PICC_ReadCardSerial()) {  // Select a card
+    return;
+}
+  UID_found = "";     // initialise the card ID string
+  for (byte i = 0; i < mfrc522.uid.size; i++) { 
+    UID_found = UID_found + String(mfrc522.uid.uidByte[i]); // read the UID byte by byte
+    }
+  sound_generation (3200,400);      // give a sound once the card is read
+  delay(300);
+
+  if (UID_found=="9212424243")    // if the read card match the required one
+  {
+    
+    sound_generation (2000,100);    // give an accepted card sound
+    delay(100);
+    sound_generation (3000,100);   // accepted card sound 2
+    delay(100);
+    sound_generation (2000,100);   // accepted card sound 3
+    delay(100);
+    sound_generation (3000,400);  // accepted card sound 4
+    // --
+    DoorStat = !DoorStat;           // change the door previous state
+    digitalWrite(LEDpin,DoorStat);  // send the door command (open/locked)
+
+  }
+}
+// ----
+// subroutines
+// ----
+// --- sound generation subroutine
+void sound_generation(int x, int t){ 
+  tone(Buzzer, x);
+  delay(t);
+  noTone(Buzzer);
+}
